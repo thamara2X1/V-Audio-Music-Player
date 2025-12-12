@@ -3,7 +3,43 @@
  * Centralized color palette for the app
  */
 
-export const COLORS = {
+export interface ColorPalette {
+  // Primary Colors
+  primary: string;
+  primaryDark: string;
+  primaryLight: string;
+
+  // Background Colors
+  backgroundDark: string;
+  backgroundLight: string;
+  cardDark: string;
+  cardLight: string;
+
+  // Text Colors
+  textPrimary: string;
+  textSecondary: string;
+  textTertiary: string;
+  textDark: string;
+  textLight: string;
+
+  // UI Colors
+  border: string;
+  borderLight: string;
+  success: string;
+  error: string;
+  warning: string;
+  info: string;
+
+  // Player Colors
+  progressBar: string;
+  progressFill: string;
+  
+  // Transparent
+  transparent: string;
+  overlay: string;
+}
+
+export const COLORS: ColorPalette = {
   // Primary Colors
   primary: '#1DB954', // Spotify green
   primaryDark: '#1AA34A',

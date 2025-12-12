@@ -15,17 +15,30 @@ import {
 import COLORS from '../constants/colors';
 import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants/theme';
 
-const HomeScreen = () => {
+interface Song {
+  id: number;
+  title: string;
+  artist: string;
+}
+
+interface QuickAction {
+  id: number;
+  icon: string;
+  title: string;
+  subtitle: string;
+}
+
+const HomeScreen: React.FC = () => {
   const isDarkMode = useColorScheme() === 'dark';
 
   // Mock data - will be replaced with real data later
-  const recentSongs = [
+  const recentSongs: Song[] = [
     { id: 1, title: 'Song Title 1', artist: 'Artist Name' },
     { id: 2, title: 'Song Title 2', artist: 'Artist Name' },
     { id: 3, title: 'Song Title 3', artist: 'Artist Name' },
   ];
 
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     { id: 1, icon: '🎵', title: 'Library', subtitle: 'Browse all songs' },
     { id: 2, icon: '📝', title: 'Playlists', subtitle: 'Your collections' },
     { id: 3, icon: '❤️', title: 'Favorites', subtitle: 'Liked songs' },
@@ -44,7 +57,7 @@ const HomeScreen = () => {
           styles.headerTitle, 
           { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
         ]}>
-          🎵 V Audio
+          🎵 Music Player
         </Text>
         <Text style={[
           styles.headerSubtitle, 

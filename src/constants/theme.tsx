@@ -5,7 +5,74 @@
 
 import COLORS from './colors';
 
-export const SPACING = {
+export interface Spacing {
+  xs: number;
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+  xxl: number;
+}
+
+export interface FontSizes {
+  xs: number;
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+  xxl: number;
+  xxxl: number;
+}
+
+export interface FontWeights {
+  regular: '400';
+  medium: '500';
+  semibold: '600';
+  bold: '700';
+}
+
+export interface BorderRadius {
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+  round: number;
+}
+
+export interface Shadow {
+  shadowColor: string;
+  shadowOffset: {
+    width: number;
+    height: number;
+  };
+  shadowOpacity: number;
+  shadowRadius: number;
+  elevation: number;
+}
+
+export interface Shadows {
+  small: Shadow;
+  medium: Shadow;
+  large: Shadow;
+}
+
+export interface Theme {
+  colors: {
+    background: string;
+    card: string;
+    text: string;
+    textSecondary: string;
+    border: string;
+    primary: string;
+  };
+  spacing: Spacing;
+  fontSizes: FontSizes;
+  fontWeights: FontWeights;
+  borderRadius: BorderRadius;
+  shadows: Shadows;
+}
+
+export const SPACING: Spacing = {
   xs: 4,
   sm: 8,
   md: 16,
@@ -14,7 +81,7 @@ export const SPACING = {
   xxl: 48,
 };
 
-export const FONT_SIZES = {
+export const FONT_SIZES: FontSizes = {
   xs: 12,
   sm: 14,
   md: 16,
@@ -24,14 +91,14 @@ export const FONT_SIZES = {
   xxxl: 40,
 };
 
-export const FONT_WEIGHTS = {
+export const FONT_WEIGHTS: FontWeights = {
   regular: '400',
   medium: '500',
   semibold: '600',
   bold: '700',
 };
 
-export const BORDER_RADIUS = {
+export const BORDER_RADIUS: BorderRadius = {
   sm: 4,
   md: 8,
   lg: 12,
@@ -39,7 +106,7 @@ export const BORDER_RADIUS = {
   round: 999,
 };
 
-export const SHADOWS = {
+export const SHADOWS: Shadows = {
   small: {
     shadowColor: '#000',
     shadowOffset: {
@@ -73,7 +140,7 @@ export const SHADOWS = {
 };
 
 // Theme helper function
-export const getTheme = (isDarkMode) => ({
+export const getTheme = (isDarkMode: boolean): Theme => ({
   colors: {
     background: isDarkMode ? COLORS.backgroundDark : COLORS.backgroundLight,
     card: isDarkMode ? COLORS.cardDark : COLORS.cardLight,
