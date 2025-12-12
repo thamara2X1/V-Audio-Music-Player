@@ -6,10 +6,15 @@
  */
 
 import React from 'react';
-import HomeScreen from './src/screens/HomeScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import BottomTabNavigator from './src/navigation/BottomTabNavigator';
 
-function App() {
-  return <HomeScreen />;
-}
+const App: React.FC = () => {
+  return (
+    <NavigationContainer>
+      <BottomTabNavigator />
+    </NavigationContainer>
+  );
+};
 
 export default App;
