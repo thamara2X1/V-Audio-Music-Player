@@ -12,6 +12,8 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import COLORS from '../constants/colors';
 import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants/theme';
 
@@ -26,23 +28,44 @@ interface QuickAction {
   icon: string;
   title: string;
   subtitle: string;
+  screen: 'Library' | 'Playlists' | 'Player';
 }
+
+type RootTabParamList = {
+  Home: undefined;
+  Library: undefined;
+  Playlists: undefined;
+  Player: undefined;
+};
+
+type NavigationProp = BottomTabNavigationProp<RootTabParamList>;
 
 const HomeScreen: React.FC = () => {
   const isDarkMode = useColorScheme() === 'dark';
+  const navigation = useNavigation<NavigationProp>();
 
   // Mock data - will be replaced with real data later
   const recentSongs: Song[] = [
-    { id: 1, title: 'Song Title 1', artist: 'Artist Name' },
-    { id: 2, title: 'Song Title 2', artist: 'Artist Name' },
-    { id: 3, title: 'Song Title 3', artist: 'Artist Name' },
+    { id: 1, title: 'Bohemian Rhapsody', artist: 'Queen' },
+    { id: 2, title: 'Stairway to Heaven', artist: 'Led Zeppelin' },
+    { id: 3, title: 'Hotel California', artist: 'Eagles' },
   ];
 
   const quickActions: QuickAction[] = [
-    { id: 1, icon: '🎵', title: 'Library', subtitle: 'Browse all songs' },
-    { id: 2, icon: '📝', title: 'Playlists', subtitle: 'Your collections' },
-    { id: 3, icon: '❤️', title: 'Favorites', subtitle: 'Liked songs' },
+    { id: 1, icon: '🎵', title: 'Library', subtitle: 'Browse all songs', screen: 'Library' },
+    { id: 2, icon: '📝', title: 'Playlists', subtitle: 'Your collections', screen: 'Playlists' },
+    { id: 3, icon: '❤️', title: 'Now Playing', subtitle: 'Current track', screen: 'Player' },
   ];
+
+  const handleQuickAction = (screen: 'Library' | 'Playlists' | 'Player') => {
+    navigation.navigate(screen);
+  };
+
+  const handlePlaySong = (song: Song) => {
+    // Will be implemented with PlayerContext later
+    console.log('Playing song:', song.title);
+    navigation.navigate('Player');
+  };
 
   return (
     <ScrollView 
@@ -83,6 +106,7 @@ const HomeScreen: React.FC = () => {
               { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
             ]}
             activeOpacity={0.7}
+            onPress={() => handleQuickAction(action.screen)}
           >
             <Text style={styles.actionIcon}>{action.icon}</Text>
             <View style={styles.actionText}>
@@ -106,12 +130,19 @@ const HomeScreen: React.FC = () => {
 
       {/* Recently Played */}
       <View style={styles.section}>
-        <Text style={[
-          styles.sectionTitle,
-          { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
-        ]}>
-          Recently Played
-        </Text>
+        <View style={styles.sectionHeader}>
+          <Text style={[
+            styles.sectionTitle,
+            { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
+          ]}>
+            Recently Played
+          </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Library')}>
+            <Text style={[styles.seeAllText, { color: COLORS.primary }]}>
+              See All
+            </Text>
+          </TouchableOpacity>
+        </View>
         {recentSongs.map((song) => (
           <TouchableOpacity
             key={song.id}
@@ -120,6 +151,7 @@ const HomeScreen: React.FC = () => {
               { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
             ]}
             activeOpacity={0.7}
+            onPress={() => handlePlaySong(song)}
           >
             <View style={styles.songAlbumArt}>
               <Text style={styles.albumArtPlaceholder}>🎵</Text>
@@ -138,7 +170,10 @@ const HomeScreen: React.FC = () => {
                 {song.artist}
               </Text>
             </View>
-            <TouchableOpacity style={styles.playButton}>
+            <TouchableOpacity 
+              style={styles.playButton}
+              onPress={() => handlePlaySong(song)}
+            >
               <Text style={styles.playIcon}>▶️</Text>
             </TouchableOpacity>
           </TouchableOpacity>
@@ -150,17 +185,23 @@ const HomeScreen: React.FC = () => {
         styles.statsCard,
         { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
       ]}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>0</Text>
+        <TouchableOpacity 
+          style={styles.statItem}
+          onPress={() => navigation.navigate('Library')}
+        >
+          <Text style={styles.statNumber}>8</Text>
           <Text style={[
             styles.statLabel,
             { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }
           ]}>
             Songs
           </Text>
-        </View>
+        </TouchableOpacity>
         <View style={styles.statDivider} />
-        <View style={styles.statItem}>
+        <TouchableOpacity 
+          style={styles.statItem}
+          onPress={() => navigation.navigate('Playlists')}
+        >
           <Text style={styles.statNumber}>0</Text>
           <Text style={[
             styles.statLabel,
@@ -168,15 +209,37 @@ const HomeScreen: React.FC = () => {
           ]}>
             Playlists
           </Text>
-        </View>
+        </TouchableOpacity>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>0</Text>
+          <Text style={styles.statNumber}>6</Text>
           <Text style={[
             styles.statLabel,
             { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }
           ]}>
             Artists
+          </Text>
+        </View>
+      </View>
+
+      {/* Quick Tip */}
+      <View style={[
+        styles.tipCard,
+        { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
+      ]}>
+        <Text style={styles.tipIcon}>💡</Text>
+        <View style={styles.tipContent}>
+          <Text style={[
+            styles.tipTitle,
+            { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
+          ]}>
+            Quick Tip
+          </Text>
+          <Text style={[
+            styles.tipText,
+            { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }
+          ]}>
+            Tap on any song to start playing, or explore your library to discover more music!
           </Text>
         </View>
       </View>
@@ -206,10 +269,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.xl,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+  },
   sectionTitle: {
     fontSize: FONT_SIZES.lg,
     fontWeight: FONT_WEIGHTS.bold,
-    marginBottom: SPACING.md,
+  },
+  seeAllText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.semibold,
   },
   actionCard: {
     flexDirection: 'row',
@@ -300,6 +372,30 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: COLORS.border,
     marginHorizontal: SPACING.md,
+  },
+  tipCard: {
+    flexDirection: 'row',
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.xl,
+    padding: SPACING.md,
+    borderRadius: BORDER_RADIUS.lg,
+  },
+  tipIcon: {
+    fontSize: 32,
+    marginRight: SPACING.md,
+  },
+  tipContent: {
+    flex: 1,
+  },
+  tipTitle: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.bold,
+    marginBottom: SPACING.xs,
+  },
+  tipText: {
+    fontSize: FONT_SIZES.sm,
+    fontWeight: FONT_WEIGHTS.regular,
+    lineHeight: 20,
   },
 });
 
