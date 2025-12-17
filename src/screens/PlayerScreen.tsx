@@ -62,7 +62,7 @@ const PlayerScreen: React.FC = () => {
 
   // Simulate playback progress (will be replaced with actual audio service)
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isPlaying && currentTime < duration) {
       interval = setInterval(() => {
         setCurrentTime(prev => {
