@@ -9,6 +9,8 @@ import { useColorScheme } from 'react-native';
 import COLORS from '../constants/colors';
 import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
+import PlayerScreen from '../screens/PlayerScreen';
+import PlaylistsScreen from '../screens/PlaylistsScreen';
 
 export type RootTabParamList = {
   Home: undefined;
@@ -18,9 +20,6 @@ export type RootTabParamList = {
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
-
-// Placeholder screens for tabs we haven't built yet
-const PlaceholderScreen = () => null;
 
 const BottomTabNavigator: React.FC = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -60,14 +59,14 @@ const BottomTabNavigator: React.FC = () => {
       />
       <Tab.Screen
         name="Playlists"
-        component={PlaceholderScreen}
+        component={PlaylistsScreen}
         options={{
           tabBarIcon: ({ color }) => <TabIcon icon="📝" color={color} />,
         }}
       />
       <Tab.Screen
         name="Player"
-        component={PlaceholderScreen}
+        component={PlayerScreen}
         options={{
           tabBarIcon: ({ color }) => <TabIcon icon="▶️" color={color} />,
         }}
