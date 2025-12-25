@@ -1,6 +1,6 @@
 /**
  * PlaylistsScreen
- * Create and manage playlists
+ * Modern playlist management with dark theme
  */
 
 import React, { useState } from 'react';
@@ -12,7 +12,6 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
-  useColorScheme,
   Alert,
 } from 'react-native';
 import COLORS from '../constants/colors';
@@ -22,61 +21,25 @@ interface Playlist {
   id: string;
   name: string;
   songCount: number;
-  duration: number; // total duration in seconds
+  duration: number;
   createdAt: number;
-  artwork?: string;
 }
 
 const PlaylistsScreen: React.FC = () => {
-  const isDarkMode = useColorScheme() === 'dark';
   const [playlists, setPlaylists] = useState<Playlist[]>([
-    {
-      id: '1',
-      name: 'Favorites',
-      songCount: 12,
-      duration: 2880,
-      createdAt: Date.now() - 86400000 * 7,
-    },
-    {
-      id: '2',
-      name: 'Road Trip',
-      songCount: 8,
-      duration: 1920,
-      createdAt: Date.now() - 86400000 * 3,
-    },
-    {
-      id: '3',
-      name: 'Workout Mix',
-      songCount: 15,
-      duration: 3600,
-      createdAt: Date.now() - 86400000,
-    },
+    { id: '1', name: 'Favorites', songCount: 12, duration: 2880, createdAt: Date.now() - 86400000 * 7 },
+    { id: '2', name: 'Road Trip', songCount: 8, duration: 1920, createdAt: Date.now() - 86400000 * 3 },
+    { id: '3', name: 'Workout Mix', songCount: 15, duration: 3600, createdAt: Date.now() - 86400000 },
   ]);
 
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState('');
 
-  // Format duration from seconds to hours and minutes
   const formatDuration = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
+    if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
-  };
-
-  // Format date to relative time
-  const formatDate = (timestamp: number): string => {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const days = Math.floor(diff / 86400000);
-    
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    return `${Math.floor(days / 30)} months ago`;
   };
 
   const handleCreatePlaylist = () => {
@@ -96,171 +59,76 @@ const PlaylistsScreen: React.FC = () => {
     setPlaylists([newPlaylist, ...playlists]);
     setNewPlaylistName('');
     setIsCreateModalVisible(false);
-    Alert.alert('Success', `Playlist "${newPlaylist.name}" created!`);
   };
 
   const handleDeletePlaylist = (playlist: Playlist) => {
     Alert.alert(
       'Delete Playlist',
-      `Are you sure you want to delete "${playlist.name}"?`,
+      `Delete "${playlist.name}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            setPlaylists(playlists.filter(p => p.id !== playlist.id));
-          },
+          onPress: () => setPlaylists(playlists.filter(p => p.id !== playlist.id)),
         },
       ]
     );
   };
 
-  const handlePlaylistPress = (playlist: Playlist) => {
-    // Will navigate to playlist detail screen later
-    Alert.alert(playlist.name, `${playlist.songCount} songs • ${formatDuration(playlist.duration)}`);
-  };
-
   const renderPlaylistItem = ({ item }: { item: Playlist }) => (
-    <TouchableOpacity
-      style={[
-        styles.playlistCard,
-        { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
-      ]}
-      activeOpacity={0.7}
-      onPress={() => handlePlaylistPress(item)}
-    >
-      {/* Playlist Artwork */}
+    <TouchableOpacity style={styles.playlistCard} activeOpacity={0.8}>
       <View style={styles.playlistArtwork}>
-        <Text style={styles.playlistArtworkIcon}>📝</Text>
+        <Text style={styles.playlistArtworkIcon}>📚</Text>
       </View>
 
-      {/* Playlist Info */}
       <View style={styles.playlistInfo}>
-        <Text
-          style={[
-            styles.playlistName,
-            { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
-          ]}
-          numberOfLines={1}
-        >
+        <Text style={styles.playlistName} numberOfLines={1}>
           {item.name}
         </Text>
-        <Text
-          style={[
-            styles.playlistMeta,
-            { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }
-          ]}
-          numberOfLines={1}
-        >
-          {item.songCount} song{item.songCount !== 1 ? 's' : ''} • {formatDuration(item.duration)}
-        </Text>
-        <Text
-          style={[
-            styles.playlistDate,
-            { color: isDarkMode ? COLORS.textTertiary : COLORS.textLight }
-          ]}
-        >
-          {formatDate(item.createdAt)}
+        <Text style={styles.playlistMeta} numberOfLines={1}>
+          {item.songCount} songs • {formatDuration(item.duration)}
         </Text>
       </View>
 
-      {/* Actions */}
-      <View style={styles.playlistActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handlePlaylistPress(item)}
-        >
-          <Text style={styles.actionIcon}>▶️</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleDeletePlaylist(item)}
-        >
-          <Text style={[styles.actionIcon, { fontSize: 20 }]}>🗑️</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeletePlaylist(item)}>
+        <Text style={styles.deleteIcon}>🗑</Text>
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Text style={styles.emptyIcon}>📝</Text>
-      <Text style={[styles.emptyText, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-        No playlists yet
-      </Text>
-      <Text style={[styles.emptySubtext, { color: isDarkMode ? COLORS.textTertiary : COLORS.textLight }]}>
-        Create your first playlist to organize your music
-      </Text>
-      <TouchableOpacity
-        style={[styles.emptyButton, { backgroundColor: COLORS.primary }]}
-        onPress={() => setIsCreateModalVisible(true)}
-      >
-        <Text style={styles.emptyButtonText}>Create Playlist</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? COLORS.backgroundDark : COLORS.backgroundLight }]}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={[styles.headerTitle, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-            Playlists
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-            {playlists.length} playlist{playlists.length !== 1 ? 's' : ''}
-          </Text>
+          <Text style={styles.headerTitle}>Playlists</Text>
+          <Text style={styles.headerSubtitle}>{playlists.length} playlists</Text>
         </View>
-        <TouchableOpacity
-          style={[styles.createButton, { backgroundColor: COLORS.primary }]}
-          onPress={() => setIsCreateModalVisible(true)}
-        >
+        <TouchableOpacity style={styles.createButton} onPress={() => setIsCreateModalVisible(true)}>
           <Text style={styles.createButtonIcon}>+</Text>
         </TouchableOpacity>
       </View>
 
       {/* Playlists List */}
-      {playlists.length > 0 ? (
-        <FlatList
-          data={playlists}
-          renderItem={renderPlaylistItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-        renderEmptyState()
-      )}
+      <FlatList
+        data={playlists}
+        renderItem={renderPlaylistItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
 
-      {/* Create Playlist Modal */}
-      <Modal
-        visible={isCreateModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsCreateModalVisible(false)}
-      >
+      {/* Create Modal */}
+      <Modal visible={isCreateModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={[
-            styles.modalContent,
-            { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.backgroundLight }
-          ]}>
-            <Text style={[styles.modalTitle, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-              Create New Playlist
-            </Text>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>New Playlist</Text>
             
             <TextInput
-              style={[
-                styles.modalInput,
-                {
-                  backgroundColor: isDarkMode ? COLORS.backgroundDark : COLORS.cardLight,
-                  color: isDarkMode ? COLORS.textPrimary : COLORS.textDark,
-                  borderColor: isDarkMode ? COLORS.border : COLORS.borderLight,
-                }
-              ]}
+              style={styles.modalInput}
               placeholder="Playlist name"
-              placeholderTextColor={isDarkMode ? COLORS.textTertiary : COLORS.textLight}
+              placeholderTextColor={COLORS.textTertiary}
               value={newPlaylistName}
               onChangeText={setNewPlaylistName}
               autoFocus
@@ -269,32 +137,17 @@ const PlaylistsScreen: React.FC = () => {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  styles.modalButtonCancel,
-                  { backgroundColor: isDarkMode ? COLORS.backgroundDark : COLORS.cardLight }
-                ]}
+                style={[styles.modalButton, styles.modalButtonCancel]}
                 onPress={() => {
                   setNewPlaylistName('');
                   setIsCreateModalVisible(false);
                 }}
               >
-                <Text style={[styles.modalButtonText, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-                  Cancel
-                </Text>
+                <Text style={styles.modalButtonTextCancel}>Cancel</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  styles.modalButtonCreate,
-                  { backgroundColor: COLORS.primary }
-                ]}
-                onPress={handleCreatePlaylist}
-              >
-                <Text style={[styles.modalButtonText, { color: '#FFFFFF' }]}>
-                  Create
-                </Text>
+              <TouchableOpacity style={[styles.modalButton, styles.modalButtonCreate]} onPress={handleCreatePlaylist}>
+                <Text style={styles.modalButtonText}>Create</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -307,120 +160,88 @@ const PlaylistsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.backgroundDark,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl,
+    paddingTop: SPACING.xxl,
     paddingBottom: SPACING.md,
   },
   headerTitle: {
-    fontSize: FONT_SIZES.xxl,
+    fontSize: FONT_SIZES.xxxl,
     fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
   headerSubtitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.regular,
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
   },
   createButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   createButtonIcon: {
-    fontSize: 32,
-    color: '#FFFFFF',
+    fontSize: 28,
+    color: COLORS.backgroundDark,
     fontWeight: FONT_WEIGHTS.bold,
   },
   listContent: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
   playlistCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.md,
+    backgroundColor: COLORS.glassBackground,
     borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
     marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
   },
   playlistArtwork: {
-    width: 70,
-    height: 70,
-    borderRadius: BORDER_RADIUS.lg,
-    backgroundColor: COLORS.primary,
+    width: 60,
+    height: 60,
+    borderRadius: BORDER_RADIUS.md,
+    backgroundColor: 'rgba(30, 215, 96, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
   },
   playlistArtworkIcon: {
-    fontSize: 36,
+    fontSize: 32,
   },
   playlistInfo: {
     flex: 1,
     marginRight: SPACING.sm,
   },
   playlistName: {
-    fontSize: FONT_SIZES.lg,
+    fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
     marginBottom: 4,
   },
   playlistMeta: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.regular,
-    marginBottom: 2,
+    color: COLORS.textSecondary,
   },
-  playlistDate: {
-    fontSize: FONT_SIZES.xs,
-    fontWeight: FONT_WEIGHTS.regular,
+  deleteButton: {
+    padding: SPACING.sm,
   },
-  playlistActions: {
-    gap: SPACING.xs,
-  },
-  actionButton: {
-    padding: SPACING.xs,
-  },
-  actionIcon: {
-    fontSize: 24,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
-  },
-  emptyIcon: {
-    fontSize: 80,
-    marginBottom: SPACING.lg,
-  },
-  emptyText: {
-    fontSize: FONT_SIZES.xl,
-    fontWeight: FONT_WEIGHTS.bold,
-    marginBottom: SPACING.xs,
-  },
-  emptySubtext: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.regular,
-    textAlign: 'center',
-    marginBottom: SPACING.xl,
-  },
-  emptyButton: {
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-  },
-  emptyButtonText: {
-    color: '#FFFFFF',
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.bold,
+  deleteIcon: {
+    fontSize: 20,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: COLORS.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SPACING.xl,
@@ -428,22 +249,28 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '100%',
     maxWidth: 400,
+    backgroundColor: COLORS.backgroundDarker,
     borderRadius: BORDER_RADIUS.xl,
     padding: SPACING.xl,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
   },
   modalTitle: {
     fontSize: FONT_SIZES.xl,
     fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
     marginBottom: SPACING.lg,
     textAlign: 'center',
   },
   modalInput: {
     fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.regular,
+    color: COLORS.textPrimary,
+    backgroundColor: COLORS.glassBackground,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
     borderRadius: BORDER_RADIUS.lg,
     borderWidth: 1,
+    borderColor: COLORS.glassBorder,
     marginBottom: SPACING.lg,
   },
   modalButtons: {
@@ -457,14 +284,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalButtonCancel: {
-    // Styles applied inline
+    backgroundColor: COLORS.glassBackground,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
   },
   modalButtonCreate: {
-    // Styles applied inline
+    backgroundColor: COLORS.primary,
   },
   modalButtonText: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.backgroundDark,
+  },
+  modalButtonTextCancel: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textSecondary,
   },
 });
 
