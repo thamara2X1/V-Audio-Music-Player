@@ -1,11 +1,11 @@
 /**
  * Bottom Tab Navigator
- * Main navigation for the app
+ * Modern minimalist navigation with icons only
  */
 
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, Text } from 'react-native';
 import COLORS from '../constants/colors';
 import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
@@ -29,17 +29,20 @@ const BottomTabNavigator: React.FC = () => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.backgroundLight,
-          borderTopColor: isDarkMode ? COLORS.border : COLORS.borderLight,
+          backgroundColor: COLORS.backgroundDark,
+          borderTopWidth: 0,
           paddingBottom: 8,
           paddingTop: 8,
           height: 60,
+          position: 'absolute',
+          elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarActiveTintColor: COLORS.primary,
-        tabBarInactiveTintColor: isDarkMode ? COLORS.textSecondary : COLORS.textLight,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
+        tabBarInactiveTintColor: COLORS.textSecondary,
+        tabBarShowLabel: false, // Hide labels for minimalist design
+        tabBarItemStyle: {
+          paddingVertical: 4,
         },
       }}
     >
@@ -47,38 +50,55 @@ const BottomTabNavigator: React.FC = () => {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarIcon: ({ color }) => <TabIcon icon="🏠" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon icon="🏠" color={color} focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
         name="Library"
         component={LibraryScreen}
         options={{
-          tabBarIcon: ({ color }) => <TabIcon icon="🎵" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon icon="🎵" color={color} focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
         name="Playlists"
         component={PlaylistsScreen}
         options={{
-          tabBarIcon: ({ color }) => <TabIcon icon="📝" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon icon="📚" color={color} focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
         name="Player"
         component={PlayerScreen}
         options={{
-          tabBarIcon: ({ color }) => <TabIcon icon="▶️" color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon icon="▶" color={color} focused={focused} />
+          ),
         }}
       />
     </Tab.Navigator>
   );
 };
 
-// Simple icon component
-const TabIcon: React.FC<{ icon: string; color: string }> = ({ icon }) => {
-  const { Text } = require('react-native');
-  return <Text style={{ fontSize: 24 }}>{icon}</Text>;
+// Modern icon component with scaling effect
+const TabIcon: React.FC<{ icon: string; color: string; focused: boolean }> = ({ icon, focused }) => {
+  return (
+    <Text 
+      style={{ 
+        fontSize: focused ? 28 : 24, 
+        opacity: focused ? 1 : 0.6,
+        transform: [{ scale: focused ? 1.1 : 1 }],
+      }}
+    >
+      {icon}
+    </Text>
+  );
 };
 
 export default BottomTabNavigator;
