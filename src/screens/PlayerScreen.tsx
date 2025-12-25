@@ -1,6 +1,6 @@
 /**
  * PlayerScreen
- * Full-screen music player with controls
+ * Modern full-screen music player with gradient background
  */
 
 import React, { useState, useEffect } from 'react';
@@ -9,14 +9,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
   Dimensions,
   ScrollView,
 } from 'react-native';
 import COLORS from '../constants/colors';
 import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants/theme';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 interface Song {
   id: string;
@@ -27,40 +26,33 @@ interface Song {
 }
 
 const PlayerScreen: React.FC = () => {
-  const isDarkMode = useColorScheme() === 'dark';
-  
-  // Player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(245); // 4:05 in seconds
+  const [duration, setDuration] = useState(354);
   const [isShuffle, setIsShuffle] = useState(false);
   const [repeatMode, setRepeatMode] = useState<'off' | 'one' | 'all'>('off');
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Mock current song
   const currentSong: Song = {
     id: '1',
-    title: 'Bohemian Rhapsody',
-    artist: 'Queen',
-    album: 'A Night at the Opera',
+    title: 'Why Not',
+    artist: 'Youngstunners',
+    album: 'Recovery',
     duration: 354,
   };
 
-  // Mock queue
   const queue: Song[] = [
     currentSong,
     { id: '2', title: 'Stairway to Heaven', artist: 'Led Zeppelin', album: 'Led Zeppelin IV', duration: 482 },
     { id: '3', title: 'Hotel California', artist: 'Eagles', album: 'Hotel California', duration: 391 },
   ];
 
-  // Format time from seconds to MM:SS
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Simulate playback progress (will be replaced with actual audio service)
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
     if (isPlaying && currentTime < duration) {
@@ -74,337 +66,259 @@ const PlayerScreen: React.FC = () => {
         });
       }, 1000);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [isPlaying, currentTime, duration]);
-
-  const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  const handlePrevious = () => {
-    setCurrentTime(0);
-    console.log('Previous track');
-  };
-
-  const handleNext = () => {
-    setCurrentTime(0);
-    console.log('Next track');
-  };
-
-  const handleShuffle = () => {
-    setIsShuffle(!isShuffle);
-  };
-
-  const handleRepeat = () => {
-    const modes: Array<'off' | 'one' | 'all'> = ['off', 'all', 'one'];
-    const currentIndex = modes.indexOf(repeatMode);
-    setRepeatMode(modes[(currentIndex + 1) % modes.length]);
-  };
-
-  const handleSeek = (value: number) => {
-    setCurrentTime(value);
-  };
-
-  const getRepeatIcon = () => {
-    switch (repeatMode) {
-      case 'one':
-        return '🔂';
-      case 'all':
-        return '🔁';
-      default:
-        return '↻';
-    }
-  };
 
   const progress = (currentTime / duration) * 100;
 
   return (
-    <ScrollView
-      style={[
-        styles.container,
-        { backgroundColor: isDarkMode ? COLORS.backgroundDark : COLORS.backgroundLight }
-      ]}
-      contentContainerStyle={styles.contentContainer}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton}>
-          <Text style={[styles.headerIcon, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-            ⌄
-          </Text>
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-          Now Playing
-        </Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <Text style={[styles.headerIcon, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-            ⋮
-          </Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      {/* Gradient Background */}
+      <View style={styles.gradientBackground}>
+        <View style={[styles.gradientTop, { backgroundColor: '#2A4A5E' }]} />
+        <View style={[styles.gradientBottom, { backgroundColor: COLORS.backgroundDark }]} />
       </View>
 
-      {/* Album Art */}
-      <View style={styles.albumArtContainer}>
-        <View style={[
-          styles.albumArt,
-          { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
-        ]}>
-          <Text style={styles.albumArtIcon}>🎵</Text>
-        </View>
-      </View>
-
-      {/* Song Info */}
-      <View style={styles.songInfo}>
-        <Text
-          style={[
-            styles.songTitle,
-            { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
-          ]}
-          numberOfLines={1}
-        >
-          {currentSong.title}
-        </Text>
-        <Text
-          style={[
-            styles.songArtist,
-            { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }
-          ]}
-          numberOfLines={1}
-        >
-          {currentSong.artist}
-        </Text>
-      </View>
-
-      {/* Favorite Button */}
-      <TouchableOpacity
-        style={styles.favoriteButton}
-        onPress={() => setIsFavorite(!isFavorite)}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.favoriteIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
-      </TouchableOpacity>
-
-      {/* Progress Bar */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressBar}>
-          <View
-            style={[
-              styles.progressFill,
-              { width: `${progress}%`, backgroundColor: COLORS.primary }
-            ]}
-          />
-          <TouchableOpacity
-            style={[
-              styles.progressThumb,
-              { left: `${progress}%`, backgroundColor: COLORS.primary }
-            ]}
-          />
-        </View>
-        <View style={styles.timeContainer}>
-          <Text style={[styles.timeText, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-            {formatTime(currentTime)}
-          </Text>
-          <Text style={[styles.timeText, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-            {formatTime(duration)}
-          </Text>
-        </View>
-      </View>
-
-      {/* Controls */}
-      <View style={styles.controls}>
-        <TouchableOpacity
-          style={styles.controlButton}
-          onPress={handleShuffle}
-        >
-          <Text
-            style={[
-              styles.controlIcon,
-              { color: isShuffle ? COLORS.primary : (isDarkMode ? COLORS.textSecondary : COLORS.textLight) }
-            ]}
-          >
-            🔀
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.controlButton}
-          onPress={handlePrevious}
-        >
-          <Text style={[styles.controlIcon, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-            ⏮
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.playButton,
-            { backgroundColor: COLORS.primary }
-          ]}
-          onPress={handlePlayPause}
-        >
-          <Text style={styles.playIcon}>{isPlaying ? '⏸' : '▶️'}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.controlButton}
-          onPress={handleNext}
-        >
-          <Text style={[styles.controlIcon, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-            ⏭
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.controlButton}
-          onPress={handleRepeat}
-        >
-          <Text
-            style={[
-              styles.controlIcon,
-              { color: repeatMode !== 'off' ? COLORS.primary : (isDarkMode ? COLORS.textSecondary : COLORS.textLight) }
-            ]}
-          >
-            {getRepeatIcon()}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Queue Preview */}
-      <View style={styles.queueSection}>
-        <View style={styles.queueHeader}>
-          <Text style={[styles.queueTitle, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-            Up Next
-          </Text>
-          <Text style={[styles.queueCount, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-            {queue.length - 1} songs
-          </Text>
-        </View>
-        {queue.slice(1, 4).map((song, index) => (
-          <View
-            key={song.id}
-            style={[
-              styles.queueItem,
-              { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
-            ]}
-          >
-            <View style={styles.queueItemAlbumArt}>
-              <Text style={styles.queueItemIcon}>🎵</Text>
-            </View>
-            <View style={styles.queueItemInfo}>
-              <Text
-                style={[
-                  styles.queueItemTitle,
-                  { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
-                ]}
-                numberOfLines={1}
-              >
-                {song.title}
-              </Text>
-              <Text
-                style={[
-                  styles.queueItemArtist,
-                  { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }
-                ]}
-                numberOfLines={1}
-              >
-                {song.artist}
-              </Text>
-            </View>
-            <Text style={[styles.queueItemDuration, { color: isDarkMode ? COLORS.textTertiary : COLORS.textLight }]}>
-              {formatTime(song.duration)}
-            </Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.headerButton}>
+            <Text style={styles.headerIcon}>⌄</Text>
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerSubtitle}>Now playing</Text>
+            <Text style={styles.headerTitle}>Playlist "Playlist of the day"</Text>
           </View>
-        ))}
-      </View>
-    </ScrollView>
+          <TouchableOpacity style={styles.headerButton}>
+            <Text style={styles.headerIcon}>⋮</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Album Art - Large and centered */}
+        <View style={styles.albumArtContainer}>
+          <View style={styles.albumArt}>
+            <Text style={styles.albumArtIcon}>🎵</Text>
+            <Text style={styles.albumLabel}>RECOVERY</Text>
+          </View>
+        </View>
+
+        {/* Song Info */}
+        <View style={styles.songInfo}>
+          <View style={styles.songTitleRow}>
+            <Text style={styles.songTitle} numberOfLines={1}>
+              {currentSong.title}
+            </Text>
+            <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
+              <Text style={styles.favoriteIcon}>{isFavorite ? '♥' : '♡'}</Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.songArtist} numberOfLines={1}>
+            {currentSong.artist}
+          </Text>
+        </View>
+
+        {/* Progress Bar */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${progress}%` }]}>
+              <View style={styles.progressDot} />
+            </View>
+          </View>
+          <View style={styles.timeContainer}>
+            <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
+            <Text style={styles.timeText}>{formatTime(duration)}</Text>
+          </View>
+        </View>
+
+        {/* Main Controls */}
+        <View style={styles.mainControls}>
+          <TouchableOpacity onPress={() => setIsShuffle(!isShuffle)}>
+            <Text style={[styles.controlIcon, isShuffle && styles.activeControl]}>⤮</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={() => setCurrentTime(0)}>
+            <Text style={styles.controlIconLarge}>⏮</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.playButton}
+            onPress={() => setIsPlaying(!isPlaying)}
+          >
+            <Text style={styles.playIcon}>{isPlaying ? '⏸' : '▶'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setCurrentTime(0)}>
+            <Text style={styles.controlIconLarge}>⏭</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => {
+            const modes: Array<'off' | 'one' | 'all'> = ['off', 'all', 'one'];
+            setRepeatMode(modes[(modes.indexOf(repeatMode) + 1) % modes.length]);
+          }}>
+            <Text style={[styles.controlIcon, repeatMode !== 'off' && styles.activeControl]}>
+              {repeatMode === 'one' ? '🔂' : repeatMode === 'all' ? '🔁' : '↻'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Bottom Controls */}
+        <View style={styles.bottomControls}>
+          <TouchableOpacity style={styles.bottomButton}>
+            <Text style={styles.bottomIcon}>🎵</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton}>
+            <Text style={styles.bottomIcon}>⚙</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton}>
+            <Text style={styles.bottomIcon}>⏱</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.bottomButton}>
+            <Text style={styles.bottomIcon}>♡</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.backgroundDark,
+  },
+  gradientBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: height * 0.6,
+  },
+  gradientTop: {
+    height: '50%',
+    opacity: 0.6,
+  },
+  gradientBottom: {
+    height: '50%',
+  },
+  scrollView: {
+    flex: 1,
   },
   contentContainer: {
-    paddingBottom: SPACING.xxl,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl,
+    paddingTop: SPACING.xxl,
     paddingBottom: SPACING.md,
   },
   headerButton: {
-    padding: SPACING.sm,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerIcon: {
     fontSize: 24,
+    color: COLORS.textPrimary,
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerSubtitle: {
+    fontSize: FONT_SIZES.xs,
+    color: COLORS.textSecondary,
+    marginBottom: 2,
   },
   headerTitle: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.semibold,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    color: COLORS.textPrimary,
+    fontWeight: FONT_WEIGHTS.medium,
   },
   albumArtContainer: {
     alignItems: 'center',
     paddingVertical: SPACING.xl,
+    marginTop: SPACING.lg,
   },
   albumArt: {
-    width: width - SPACING.xl * 2,
-    height: width - SPACING.xl * 2,
+    width: width * 0.85,
+    height: width * 0.85,
     borderRadius: BORDER_RADIUS.xl,
+    backgroundColor: COLORS.glassBackground,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
   },
   albumArtIcon: {
-    fontSize: 120,
+    fontSize: 100,
+    marginBottom: SPACING.md,
+  },
+  albumLabel: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    fontWeight: FONT_WEIGHTS.bold,
+    letterSpacing: 2,
   },
   songInfo: {
     paddingHorizontal: SPACING.xl,
-    alignItems: 'center',
     marginTop: SPACING.xl,
   },
-  songTitle: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: FONT_WEIGHTS.bold,
+  songTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: SPACING.xs,
-    textAlign: 'center',
   },
-  songArtist: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: FONT_WEIGHTS.regular,
-    textAlign: 'center',
-  },
-  favoriteButton: {
-    alignSelf: 'center',
-    marginTop: SPACING.md,
-    padding: SPACING.sm,
+  songTitle: {
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
+    flex: 1,
   },
   favoriteIcon: {
-    fontSize: 32,
+    fontSize: 28,
+    color: COLORS.textPrimary,
+    marginLeft: SPACING.md,
+  },
+  songArtist: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textSecondary,
   },
   progressContainer: {
     paddingHorizontal: SPACING.xl,
     marginTop: SPACING.xl,
   },
   progressBar: {
-    height: 4,
+    height: 3,
     backgroundColor: COLORS.progressBar,
     borderRadius: BORDER_RADIUS.sm,
-    position: 'relative',
+    overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: COLORS.primary,
+    position: 'relative',
   },
-  progressThumb: {
+  progressDot: {
     position: 'absolute',
-    top: -6,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginLeft: -8,
+    right: -6,
+    top: -3,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.primary,
   },
   timeContainer: {
     flexDirection: 'row',
@@ -413,85 +327,54 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: FONT_SIZES.xs,
-    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.textSecondary,
   },
-  controls: {
+  mainControls: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.xl,
-    gap: SPACING.lg,
-  },
-  controlButton: {
-    padding: SPACING.md,
+    marginTop: SPACING.xxl,
+    gap: SPACING.xl,
   },
   controlIcon: {
-    fontSize: 28,
+    fontSize: 24,
+    color: COLORS.textSecondary,
+  },
+  controlIconLarge: {
+    fontSize: 32,
+    color: COLORS.textPrimary,
+  },
+  activeControl: {
+    color: COLORS.primary,
   },
   playButton: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: COLORS.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   playIcon: {
-    fontSize: 32,
+    fontSize: 28,
+    color: COLORS.backgroundDark,
   },
-  queueSection: {
-    paddingHorizontal: SPACING.lg,
+  bottomControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: SPACING.xxl,
     marginTop: SPACING.xxl,
   },
-  queueHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
-  },
-  queueTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-  queueCount: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.medium,
-  },
-  queueItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    marginBottom: SPACING.sm,
-  },
-  queueItemAlbumArt: {
-    width: 40,
-    height: 40,
-    borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.primary,
+  bottomButton: {
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.md,
   },
-  queueItemIcon: {
-    fontSize: 20,
-  },
-  queueItemInfo: {
-    flex: 1,
-    marginRight: SPACING.sm,
-  },
-  queueItemTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.semibold,
-    marginBottom: 2,
-  },
-  queueItemArtist: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.regular,
-  },
-  queueItemDuration: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.regular,
+  bottomIcon: {
+    fontSize: 22,
+    color: COLORS.textSecondary,
   },
 });
 
