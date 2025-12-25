@@ -1,6 +1,6 @@
 /**
  * LibraryScreen
- * Display all songs in the library with search and filter
+ * Modern library view with search and filters
  */
 
 import React, { useState, useMemo } from 'react';
@@ -11,7 +11,7 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  useColorScheme,
+  ScrollView,
 } from 'react-native';
 import COLORS from '../constants/colors';
 import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants/theme';
@@ -21,17 +21,15 @@ interface Song {
   title: string;
   artist: string;
   album: string;
-  duration: number; // in seconds
+  duration: number;
 }
 
 type SortOption = 'title' | 'artist' | 'album' | 'duration';
 
 const LibraryScreen: React.FC = () => {
-  const isDarkMode = useColorScheme() === 'dark';
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('title');
 
-  // Mock data - will be replaced with real data from file system
   const mockSongs: Song[] = [
     { id: '1', title: 'Bohemian Rhapsody', artist: 'Queen', album: 'A Night at the Opera', duration: 354 },
     { id: '2', title: 'Stairway to Heaven', artist: 'Led Zeppelin', album: 'Led Zeppelin IV', duration: 482 },
@@ -43,14 +41,12 @@ const LibraryScreen: React.FC = () => {
     { id: '8', title: 'Come Together', artist: 'The Beatles', album: 'Abbey Road', duration: 259 },
   ];
 
-  // Format duration from seconds to MM:SS
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Filter and sort songs
   const filteredAndSortedSongs = useMemo(() => {
     let filtered = mockSongs.filter(song =>
       song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -58,19 +54,13 @@ const LibraryScreen: React.FC = () => {
       song.album.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Sort songs
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'title':
-          return a.title.localeCompare(b.title);
-        case 'artist':
-          return a.artist.localeCompare(b.artist);
-        case 'album':
-          return a.album.localeCompare(b.album);
-        case 'duration':
-          return a.duration - b.duration;
-        default:
-          return 0;
+        case 'title': return a.title.localeCompare(b.title);
+        case 'artist': return a.artist.localeCompare(b.artist);
+        case 'album': return a.album.localeCompare(b.album);
+        case 'duration': return a.duration - b.duration;
+        default: return 0;
       }
     });
 
@@ -78,102 +68,55 @@ const LibraryScreen: React.FC = () => {
   }, [searchQuery, sortBy]);
 
   const renderSongItem = ({ item }: { item: Song }) => (
-    <TouchableOpacity
-      style={[
-        styles.songItem,
-        { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }
-      ]}
-      activeOpacity={0.7}
-    >
-      {/* Album Art Placeholder */}
+    <TouchableOpacity style={styles.songItem} activeOpacity={0.7}>
       <View style={styles.albumArt}>
         <Text style={styles.albumArtIcon}>🎵</Text>
       </View>
 
-      {/* Song Info */}
       <View style={styles.songInfo}>
-        <Text
-          style={[
-            styles.songTitle,
-            { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
-          ]}
-          numberOfLines={1}
-        >
+        <Text style={styles.songTitle} numberOfLines={1}>
           {item.title}
         </Text>
-        <Text
-          style={[
-            styles.songArtist,
-            { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }
-          ]}
-          numberOfLines={1}
-        >
-          {item.artist} • {item.album}
+        <Text style={styles.songArtist} numberOfLines={1}>
+          {item.artist}
         </Text>
       </View>
 
-      {/* Duration */}
-      <Text
-        style={[
-          styles.duration,
-          { color: isDarkMode ? COLORS.textTertiary : COLORS.textLight }
-        ]}
-      >
-        {formatDuration(item.duration)}
-      </Text>
+      <Text style={styles.duration}>{formatDuration(item.duration)}</Text>
 
-      {/* More Options */}
       <TouchableOpacity style={styles.moreButton}>
-        <Text style={[styles.moreIcon, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-          ⋮
-        </Text>
+        <Text style={styles.moreIcon}>⋮</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
   const SortButton = ({ option, label }: { option: SortOption; label: string }) => (
     <TouchableOpacity
-      style={[
-        styles.sortButton,
-        sortBy === option && styles.sortButtonActive,
-        { backgroundColor: sortBy === option ? COLORS.primary : (isDarkMode ? COLORS.cardDark : COLORS.cardLight) }
-      ]}
+      style={[styles.sortChip, sortBy === option && styles.sortChipActive]}
       onPress={() => setSortBy(option)}
     >
-      <Text
-        style={[
-          styles.sortButtonText,
-          { color: sortBy === option ? '#FFFFFF' : (isDarkMode ? COLORS.textSecondary : COLORS.textLight) }
-        ]}
-      >
+      <Text style={[styles.sortChipText, sortBy === option && styles.sortChipTextActive]}>
         {label}
       </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? COLORS.backgroundDark : COLORS.backgroundLight }]}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }]}>
-          Library
-        </Text>
-        <Text style={[styles.headerSubtitle, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-          {filteredAndSortedSongs.length} song{filteredAndSortedSongs.length !== 1 ? 's' : ''}
-        </Text>
+        <Text style={styles.headerTitle}>Library</Text>
+        <Text style={styles.headerSubtitle}>{filteredAndSortedSongs.length} songs</Text>
       </View>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <View style={[styles.searchBar, { backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight }]}>
+        <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
-            style={[
-              styles.searchInput,
-              { color: isDarkMode ? COLORS.textPrimary : COLORS.textDark }
-            ]}
-            placeholder="Search songs, artists, albums..."
-            placeholderTextColor={isDarkMode ? COLORS.textTertiary : COLORS.textLight}
+            style={styles.searchInput}
+            placeholder="Search songs, artists..."
+            placeholderTextColor={COLORS.textTertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -185,39 +128,24 @@ const LibraryScreen: React.FC = () => {
         </View>
       </View>
 
-      {/* Sort Options */}
+      {/* Sort Chips */}
       <View style={styles.sortContainer}>
-        <Text style={[styles.sortLabel, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-          Sort by:
-        </Text>
-        <View style={styles.sortButtons}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortScroll}>
           <SortButton option="title" label="Title" />
           <SortButton option="artist" label="Artist" />
           <SortButton option="album" label="Album" />
           <SortButton option="duration" label="Duration" />
-        </View>
+        </ScrollView>
       </View>
 
       {/* Song List */}
-      {filteredAndSortedSongs.length > 0 ? (
-        <FlatList
-          data={filteredAndSortedSongs}
-          renderItem={renderSongItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>🎵</Text>
-          <Text style={[styles.emptyText, { color: isDarkMode ? COLORS.textSecondary : COLORS.textLight }]}>
-            {searchQuery ? 'No songs found' : 'No songs in library'}
-          </Text>
-          <Text style={[styles.emptySubtext, { color: isDarkMode ? COLORS.textTertiary : COLORS.textLight }]}>
-            {searchQuery ? 'Try a different search term' : 'Add music files to get started'}
-          </Text>
-        </View>
-      )}
+      <FlatList
+        data={filteredAndSortedSongs}
+        renderItem={renderSongItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 };
@@ -225,20 +153,22 @@ const LibraryScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: COLORS.backgroundDark,
   },
   header: {
     paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.xl,
+    paddingTop: SPACING.xxl,
     paddingBottom: SPACING.md,
   },
   headerTitle: {
-    fontSize: FONT_SIZES.xxl,
+    fontSize: FONT_SIZES.xxxl,
     fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.textPrimary,
     marginBottom: SPACING.xs,
   },
   headerSubtitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: FONT_WEIGHTS.regular,
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
   },
   searchContainer: {
     paddingHorizontal: SPACING.lg,
@@ -247,9 +177,12 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: COLORS.glassBackground,
+    borderRadius: BORDER_RADIUS.lg,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
   },
   searchIcon: {
     fontSize: 18,
@@ -258,57 +191,61 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: FONT_SIZES.md,
+    color: COLORS.textPrimary,
     paddingVertical: SPACING.xs,
   },
   clearIcon: {
-    fontSize: 18,
+    fontSize: 16,
     color: COLORS.textTertiary,
     padding: SPACING.xs,
   },
   sortContainer: {
-    paddingHorizontal: SPACING.lg,
     marginBottom: SPACING.md,
   },
-  sortLabel: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.medium,
-    marginBottom: SPACING.sm,
-  },
-  sortButtons: {
-    flexDirection: 'row',
+  sortScroll: {
+    paddingHorizontal: SPACING.lg,
     gap: SPACING.sm,
   },
-  sortButton: {
+  sortChip: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: BORDER_RADIUS.round,
+    backgroundColor: COLORS.glassBackground,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
   },
-  sortButtonActive: {
-    // Active state handled by backgroundColor in component
+  sortChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
-  sortButtonText: {
+  sortChipText: {
     fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
     fontWeight: FONT_WEIGHTS.medium,
+  },
+  sortChipTextActive: {
+    color: COLORS.backgroundDark,
   },
   listContent: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.xl,
+    paddingBottom: 100,
   },
   songItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: SPACING.md,
-    borderRadius: BORDER_RADIUS.lg,
-    marginBottom: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   albumArt: {
-    width: 50,
-    height: 50,
-    borderRadius: BORDER_RADIUS.md,
-    backgroundColor: COLORS.primary,
+    width: 48,
+    height: 48,
+    borderRadius: BORDER_RADIUS.sm,
+    backgroundColor: COLORS.glassBackground,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
   },
   albumArtIcon: {
     fontSize: 24,
@@ -320,15 +257,16 @@ const styles = StyleSheet.create({
   songTitle: {
     fontSize: FONT_SIZES.md,
     fontWeight: FONT_WEIGHTS.semibold,
+    color: COLORS.textPrimary,
     marginBottom: 2,
   },
   songArtist: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.regular,
+    color: COLORS.textSecondary,
   },
   duration: {
     fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.regular,
+    color: COLORS.textTertiary,
     marginRight: SPACING.sm,
   },
   moreButton: {
@@ -336,27 +274,7 @@ const styles = StyleSheet.create({
   },
   moreIcon: {
     fontSize: 20,
-    fontWeight: FONT_WEIGHTS.bold,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.xl,
-  },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: SPACING.md,
-  },
-  emptyText: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: FONT_WEIGHTS.semibold,
-    marginBottom: SPACING.xs,
-  },
-  emptySubtext: {
-    fontSize: FONT_SIZES.sm,
-    fontWeight: FONT_WEIGHTS.regular,
-    textAlign: 'center',
+    color: COLORS.textSecondary,
   },
 });
 
