@@ -1,6 +1,6 @@
 /**
  * Color Constants
- * Centralized color palette for the app
+ * Centralized color palette for the app - Modern Dark Theme
  */
 
 export interface ColorPalette {
@@ -9,9 +9,11 @@ export interface ColorPalette {
   primaryDark: string;
   primaryLight: string;
 
-  // Background Colors
+  // Background Colors - Dark gradient theme
   backgroundDark: string;
-  backgroundLight: string;
+  backgroundDarker: string;
+  backgroundGradientStart: string;
+  backgroundGradientEnd: string;
   cardDark: string;
   cardLight: string;
 
@@ -34,21 +36,28 @@ export interface ColorPalette {
   progressBar: string;
   progressFill: string;
   
+  // Glass/Blur effects
+  glassBackground: string;
+  glassBorder: string;
+  
   // Transparent
   transparent: string;
   overlay: string;
+  overlayLight: string;
 }
 
 export const COLORS: ColorPalette = {
-  // Primary Colors
-  primary: '#1DB954', // Spotify green
-  primaryDark: '#1AA34A',
-  primaryLight: '#1ED760',
+  // Primary Colors - Modern green accent
+  primary: '#1ED760',
+  primaryDark: '#1DB954',
+  primaryLight: '#1FDF64',
 
-  // Background Colors
-  backgroundDark: '#121212',
-  backgroundLight: '#FFFFFF',
-  cardDark: '#1E1E1E',
+  // Background Colors - Deep black theme
+  backgroundDark: '#000000',
+  backgroundDarker: '#0A0A0A',
+  backgroundGradientStart: '#1A1A1A',
+  backgroundGradientEnd: '#000000',
+  cardDark: 'rgba(255, 255, 255, 0.05)',
   cardLight: '#F5F5F5',
 
   // Text Colors
@@ -59,20 +68,25 @@ export const COLORS: ColorPalette = {
   textLight: '#666666',
 
   // UI Colors
-  border: '#333333',
+  border: 'rgba(255, 255, 255, 0.1)',
   borderLight: '#E0E0E0',
-  success: '#1DB954',
+  success: '#1ED760',
   error: '#E22134',
   warning: '#FFA500',
   info: '#1E90FF',
 
   // Player Colors
-  progressBar: '#535353',
-  progressFill: '#1DB954',
+  progressBar: 'rgba(255, 255, 255, 0.2)',
+  progressFill: '#1ED760',
+  
+  // Glass/Blur effects
+  glassBackground: 'rgba(255, 255, 255, 0.08)',
+  glassBorder: 'rgba(255, 255, 255, 0.15)',
   
   // Transparent
   transparent: 'transparent',
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  overlay: 'rgba(0, 0, 0, 0.7)',
+  overlayLight: 'rgba(0, 0, 0, 0.4)',
 };
 
 export default COLORS;
