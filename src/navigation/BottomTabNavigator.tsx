@@ -51,7 +51,7 @@ const BottomTabNavigator: React.FC = () => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon icon="🏠" color={color} focused={focused} />
+            <TabIcon icon="♫" color={color} focused={focused} />
           ),
         }}
       />
@@ -60,7 +60,7 @@ const BottomTabNavigator: React.FC = () => {
         component={LibraryScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon icon="🎵" color={color} focused={focused} />
+            <TabIcon icon="⚙" color={color} focused={focused} />
           ),
         }}
       />
@@ -69,7 +69,7 @@ const BottomTabNavigator: React.FC = () => {
         component={PlaylistsScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon icon="📚" color={color} focused={focused} />
+            <TabIcon icon="⏱" color={color} focused={focused} />
           ),
         }}
       />
@@ -78,7 +78,7 @@ const BottomTabNavigator: React.FC = () => {
         component={PlayerScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon icon="▶" color={color} focused={focused} />
+            <TabIcon icon="♡" color={color} focused={focused} />
           ),
         }}
       />
@@ -86,14 +86,15 @@ const BottomTabNavigator: React.FC = () => {
   );
 };
 
-// Modern icon component with scaling effect
-const TabIcon: React.FC<{ icon: string; color: string; focused: boolean }> = ({ icon, focused }) => {
+// Modern icon component with scaling effect and color support
+const TabIcon: React.FC<{ icon: string; color: string; focused: boolean }> = ({ icon, color, focused }) => {
   return (
     <Text 
       style={{ 
-        fontSize: focused ? 28 : 24, 
-        opacity: focused ? 1 : 0.6,
-        transform: [{ scale: focused ? 1.1 : 1 }],
+        fontSize: focused ? 26 : 24, 
+        color: color,
+        opacity: focused ? 1 : 0.7,
+        fontWeight: focused ? '600' : '400',
       }}
     >
       {icon}
