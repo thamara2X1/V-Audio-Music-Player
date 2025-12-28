@@ -8,12 +8,15 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import BottomTabNavigator from './src/navigation/BottomTabNavigator';
+import { PlayerProvider } from './src/context/PlayerContext';
 
 const App: React.FC = () => {
   return (
-    <NavigationContainer>
-      <BottomTabNavigator />
-    </NavigationContainer>
+    <PlayerProvider>
+      <NavigationContainer>
+        <BottomTabNavigator />
+      </NavigationContainer>
+    </PlayerProvider>
   );
 };
 
