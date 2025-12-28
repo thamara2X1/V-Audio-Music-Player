@@ -13,10 +13,13 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import COLORS from '../constants/colors';
 import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants/theme';
+import { usePlayer, Song } from '../context/PlayerContext';
 
-interface Song {
+interface LibrarySong {
   id: string;
   title: string;
   artist: string;
@@ -26,11 +29,22 @@ interface Song {
 
 type SortOption = 'title' | 'artist' | 'album' | 'duration';
 
+type RootTabParamList = {
+  Home: undefined;
+  Library: undefined;
+  Playlists: undefined;
+  Player: undefined;
+};
+
+type NavigationProp = BottomTabNavigationProp<RootTabParamList>;
+
 const LibraryScreen: React.FC = () => {
+  const navigation = useNavigation<NavigationProp>();
+  const { playSong } = usePlayer();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('title');
 
-  const mockSongs: Song[] = [
+  const mockSongs: LibrarySong[] = [
     { id: '1', title: 'Bohemian Rhapsody', artist: 'Queen', album: 'A Night at the Opera', duration: 354 },
     { id: '2', title: 'Stairway to Heaven', artist: 'Led Zeppelin', album: 'Led Zeppelin IV', duration: 482 },
     { id: '3', title: 'Imagine', artist: 'John Lennon', album: 'Imagine', duration: 183 },
@@ -40,6 +54,26 @@ const LibraryScreen: React.FC = () => {
     { id: '7', title: 'Sweet Child O Mine', artist: "Guns N' Roses", album: 'Appetite for Destruction', duration: 356 },
     { id: '8', title: 'Come Together', artist: 'The Beatles', album: 'Abbey Road', duration: 259 },
   ];
+
+  const handlePlaySong = (song: LibrarySong, index: number) => {
+    // Convert to Song type and play
+    const songToPlay: Song = {
+      id: song.id,
+      title: song.title,
+      artist: song.artist,
+      album: song.album,
+      duration: song.duration,
+    };
+    const queue: Song[] = filteredAndSortedSongs.map(s => ({
+      id: s.id,
+      title: s.title,
+      artist: s.artist,
+      album: s.album,
+      duration: s.duration,
+    }));
+    playSong(songToPlay, queue);
+    navigation.navigate('Player');
+  };
 
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -67,8 +101,12 @@ const LibraryScreen: React.FC = () => {
     return filtered;
   }, [searchQuery, sortBy]);
 
-  const renderSongItem = ({ item }: { item: Song }) => (
-    <TouchableOpacity style={styles.songItem} activeOpacity={0.7}>
+  const renderSongItem = ({ item, index }: { item: LibrarySong; index: number }) => (
+    <TouchableOpacity 
+      style={styles.songItem} 
+      activeOpacity={0.7}
+      onPress={() => handlePlaySong(item, index)}
+    >
       <View style={styles.albumArt}>
         <Text style={styles.albumArtIcon}>🎵</Text>
       </View>
@@ -228,7 +266,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 100,
+    paddingBottom: 160, // Space for mini player + tab bar
   },
   songItem: {
     flexDirection: 'row',
