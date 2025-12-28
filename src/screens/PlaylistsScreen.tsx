@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 100,
+    paddingBottom: 160, // Space for mini player + tab bar
   },
   playlistCard: {
     flexDirection: 'row',
