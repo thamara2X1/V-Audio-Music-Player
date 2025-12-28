@@ -15,12 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import COLORS from '../constants/colors';
 import { SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS } from '../constants/theme';
-
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-}
+import { usePlayer, Song } from '../context/PlayerContext';
 
 interface QuickAction {
   id: number;
@@ -41,12 +36,18 @@ type NavigationProp = BottomTabNavigationProp<RootTabParamList>;
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { playSong } = usePlayer();
 
   const recentSongs: Song[] = [
-    { id: 1, title: 'Bohemian Rhapsody', artist: 'Queen' },
-    { id: 2, title: 'Stairway to Heaven', artist: 'Led Zeppelin' },
-    { id: 3, title: 'Hotel California', artist: 'Eagles' },
+    { id: '1', title: 'Bohemian Rhapsody', artist: 'Queen', album: 'A Night at the Opera', duration: 354 },
+    { id: '2', title: 'Stairway to Heaven', artist: 'Led Zeppelin', album: 'Led Zeppelin IV', duration: 482 },
+    { id: '3', title: 'Hotel California', artist: 'Eagles', album: 'Hotel California', duration: 391 },
   ];
+
+  const handlePlaySong = (song: Song) => {
+    playSong(song, recentSongs);
+    navigation.navigate('Player');
+  };
 
   const quickActions: QuickAction[] = [
     { id: 1, icon: '🎵', title: 'Library', subtitle: 'Browse all songs', screen: 'Library' },
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingBottom: 100,
+    paddingBottom: 160, // Space for mini player + tab bar
   },
   header: {
     paddingHorizontal: SPACING.lg,
